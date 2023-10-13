@@ -67,6 +67,7 @@ export class block extends Component {
         if (whichBase !== -1) {
             // set block postion to base position
             this.node.setPosition({...curPosition, x: game._basePosArr[whichBase].x, y: game.getBaseY(whichBase) + game._blockHeight} as Vec3);
+            game._steps++;
         } else {
             // set node postion to pre position
             this.node.setPosition(this._prePos);

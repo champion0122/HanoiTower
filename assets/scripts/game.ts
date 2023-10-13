@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Node, Prefab, Size, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, director, instantiate, Label, Node, Prefab, Size, UITransform, Vec3 } from 'cc';
 import { block } from './block';
 const { ccclass, property } = _decorator;
 
@@ -7,23 +7,32 @@ export class game extends Component {
     @property(Node) baseLayerNode: Node;
     @property(Node) blockLayerNode: Node;
     @property(Prefab) block: Prefab;
-
+    @property(Label) stepLabel: Label;    
+    @property(Label) levelLabel: Label;    
+    
+    _level = 3;
     _lowestBaseY = -166;
     _basePosArr: Vec3[];
     _baseSize: Size;
     _blockHeight: number;
     _blockSortedArr: [Node[],Node[],Node[]];
+    _steps = 0;
 
     start() {
         // add this to window as game property
        (window as any).game = this; 
-
-        this.initBlock(6);
+        this.levelLabel.string = `当前关卡:${this._level - 2}`;
+        this.initBlock(this._level);
         this.getBlock();
     }
 
     update(deltaTime: number) {
-        
+        if(this._blockSortedArr[2].length === this._level) {
+            this._level++;
+            this.reset();
+            this.start();
+        }
+        this.stepLabel.string = `已用步数:${this._steps}`;
     }
  
     initBlock(blockNum: number) {
@@ -88,6 +97,15 @@ export class game extends Component {
     // 获取指定base的已有y高度
     getBaseY(baseIndex: number): number {
         return this._lowestBaseY + this._blockSortedArr[baseIndex].length * this._blockHeight;
+    }
+
+    reset(){
+        this._blockSortedArr = [[],[],[]];
+        this._steps = 0;
+        this.blockLayerNode.children.forEach((n) => {
+            // destroy(n);
+            n.destroy();
+        })
     }
 }
 
