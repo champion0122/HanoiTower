@@ -11,9 +11,9 @@ export class game extends Component {
     @property(Label) levelLabel: Label;    
     
     _level = 3;
-    _lowestBaseY = -166;
     _basePosArr: Vec3[];
     _baseSize: Size;
+    _lowestBaseY;
     _blockHeight: number;
     _blockSortedArr: [Node[],Node[],Node[]];
     _steps = 0;
@@ -41,6 +41,9 @@ export class game extends Component {
             return n.position;
         })
         this._baseSize = baseArr[0].getComponent(UITransform).contentSize;
+        this._lowestBaseY =  0 - this._baseSize.y / 2;
+        console.log(this._lowestBaseY);
+        
         for (let i = 0; i < blockNum; i++) {
             const blockNode = instantiate(this.block);
             this._blockHeight = blockNode.getComponent(UITransform).contentSize.height;
