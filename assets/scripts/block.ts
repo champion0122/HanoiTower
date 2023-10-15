@@ -1,4 +1,4 @@
-import { _decorator, Component, Input, Node, Sprite, SpriteAtlas, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, Input, Node, Sprite, SpriteAtlas, UITransform, Vec3, view } from 'cc';
 
 const { ccclass, property } = _decorator;
 
@@ -53,24 +53,15 @@ export class block extends Component {
 
     onTouchMove(e) {
         if(!this._isFirst) return;
-        
-        const {x,y,z} = e.getDelta();
-        const deviceRatio = window.devicePixelRatio;
-        console.log(x,y,deviceRatio);
-        this._delta = {...e.getDelta(), z: 0
-            , y: y / deviceRatio, x: x / deviceRatio
-        };
-        const prevPosition = this.node.getPosition();
-        prevPosition.add(this._delta);
-        this.node.setPosition(prevPosition);
-        console.log('move');
+
+        let pos = e.getUILocation();
+        this.node.setWorldPosition(pos.x, pos.y, 0);
+
     }
 
     onTouchEnd() {
-        console.log('end');
         const curPosition = this.node.getPosition();
         const whichBase = game.checkWhichBase(curPosition, this);
-        console.log(whichBase);
         if (whichBase !== -1) {
             // set block postion to base position
             this.node.setPosition({...curPosition, x: game._basePosArr[whichBase].x, y: game.getBaseY(whichBase) + game._blockHeight} as Vec3);
@@ -80,6 +71,6 @@ export class block extends Component {
             this.node.setPosition(this._prePos);
         }
 
-        game.getBlock();
+        game.sortBlock();
     }
 }

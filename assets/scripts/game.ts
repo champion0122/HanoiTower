@@ -9,8 +9,10 @@ export class game extends Component {
     @property(Prefab) block: Prefab;
     @property(Label) stepLabel: Label;    
     @property(Label) levelLabel: Label;    
+    @property(Node)
+    friendRank: Node | null = null;
     
-    _level = 3;
+    _level = 1;
     _basePosArr: Vec3[];
     _baseSize: Size;
     _lowestBaseY;
@@ -21,16 +23,17 @@ export class game extends Component {
     start() {
         // add this to window as game property
        (window as any).game = this; 
-        this.levelLabel.string = `当前关卡:${this._level - 2}`;
-        this.initBlock(this._level);
-        this.getBlock();
+
+       this.levelLabel.string = `当前关卡:${this._level}`;
+       this.initBlock(this._level + 2);
+       this.sortBlock();
     }
 
     update(deltaTime: number) {
-        if(this._blockSortedArr[2].length === this._level) {
+        if(this._blockSortedArr[2].length === this._level + 2) {
+            this.storageScore();
             this._level++;
             this.reset();
-            this.start();
         }
         this.stepLabel.string = `已用步数:${this._steps}`;
     }
@@ -84,7 +87,7 @@ export class game extends Component {
         return lastBlockWidth > blockWidth;
     }
 
-    getBlock() {
+    sortBlock() {
         this._blockSortedArr = [[],[],[]];
         this.blockLayerNode.children.forEach((n: any) => {
             this._basePosArr.forEach((element,index) => {
@@ -109,6 +112,46 @@ export class game extends Component {
             // destroy(n);
             n.destroy();
         })
+
+        // 下一帧回调
+        this.scheduleOnce(() => {
+            this.start();
+        })
+    }
+
+    onClickFriendRank() {
+        this.closeView();
+        this.friendRank.active = true;
+        window["wx"].postMessage({ command: "render" });
+    }
+
+    closeView() {
+        // 发消息给子域
+        window["wx"].postMessage({ command: "close" });
+    }
+
+    // wx 存储
+    storageScore(){
+        window["wx"].setUserCloudStorage({
+            KVDataList: [
+                {
+                    key: "wxScore",
+                    value: JSON.stringify({
+                        level: this._level,
+                        steps: this._steps,
+                        updateTime: Date.now(),
+                    }),
+                },
+            ],
+            success: (res) => {
+                console.log('success');
+                console.log(res);
+            },
+            fail: (res) => {
+                console.log('fail');
+                console.log(res);
+            },
+        });
     }
 }
 
