@@ -86,6 +86,7 @@ let users = [];
 /** @type {WechatMinigame.UserInfo} */
 let myself = null;
 let offsetY = 0;
+let curLevel = 1;
 //好友排行榜位置信息配置
 //列表宽高
 const area = {
@@ -224,7 +225,7 @@ function drawUsers3() {
 function init() {
     offsetY = 0;
     render();
-    var key = 'wxScore';
+    var key = `wxScore-${curLevel}`;
     wx.getFriendCloudStorage({
         keyList: [key],
         success(res) {
@@ -251,11 +252,11 @@ function init() {
                     a.detail.steps - b.detail.steps || a.detail.updateTime - b.detail.updateTime
             );
             //test 加多10个，看看超过列表高度显示情况
-            if(users.length){
-                for (let i = 0; i < 10; i++) {
-                    users.push(users[0])
-                }
-            }
+            // if(users.length){
+            //     for (let i = 0; i < 10; i++) {
+            //         users.push(users[0])
+            //     }
+            // }
             render();
         },
         fail(res) {
@@ -301,6 +302,9 @@ wx.onMessage((res) => {
         case 'close': {
             isScrollEnable = false;
             break;
+        }
+        case 'setCurLevel': {
+            curLevel = res.level;
         }
     }
 });

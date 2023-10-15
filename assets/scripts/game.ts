@@ -11,6 +11,7 @@ export class game extends Component {
     @property(Label) levelLabel: Label;    
     @property(Node)
     friendRank: Node | null = null;
+    @property(Node) closeBtn: Node;
     
     _level = 1;
     _basePosArr: Vec3[];
@@ -24,7 +25,7 @@ export class game extends Component {
         // add this to window as game property
        (window as any).game = this; 
 
-       this.levelLabel.string = `当前关卡:${this._level}`;
+       this.setCurLevel();
        this.initBlock(this._level + 2);
        this.sortBlock();
     }
@@ -121,13 +122,22 @@ export class game extends Component {
 
     onClickFriendRank() {
         this.closeView();
+        this.closeBtn.active = true;
         this.friendRank.active = true;
         window["wx"].postMessage({ command: "render" });
     }
 
     closeView() {
+        this.closeBtn.active = false;
+        this.friendRank.active = false;
         // 发消息给子域
         window["wx"].postMessage({ command: "close" });
+    }
+
+    setCurLevel(){
+        this.levelLabel.string = `当前关卡:${this._level}`;
+        // 发消息给子域
+        window["wx"].postMessage({ command: "setCurLevel", level: this._level });
     }
 
     // wx 存储
@@ -135,7 +145,7 @@ export class game extends Component {
         window["wx"].setUserCloudStorage({
             KVDataList: [
                 {
-                    key: "wxScore",
+                    key: `wxScore-${this._level}`,
                     value: JSON.stringify({
                         level: this._level,
                         steps: this._steps,
