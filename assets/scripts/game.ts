@@ -12,6 +12,7 @@ export class game extends Component {
     @property(Node)
     friendRank: Node | null = null;
     @property(Node) closeBtn: Node;
+    @property(Node) successMask: Node;
     
     _level = 1;
     _basePosArr: Vec3[];
@@ -32,13 +33,24 @@ export class game extends Component {
 
     update(deltaTime: number) {
         if(this._blockSortedArr[2].length === this._level + 2) {
-            this.storageScore();
-            this._level++;
-            this.reset();
+            if(this._level === 4){
+                this.successMask.active = true;
+            }
+            else {
+                this.storageScore();
+                this._level++;
+                this.reset();
+            }
         }
         this.stepLabel.string = `已用步数:${this._steps}`;
     }
  
+    restart() {
+        this._level = 1;
+        this.reset();
+        this.successMask.active = false;
+    }
+
     initBlock(blockNum: number) {
         const baseArr = this.baseLayerNode.children;
         this._basePosArr = baseArr.map(n => {
