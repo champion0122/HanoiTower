@@ -13,6 +13,7 @@ export class game extends Component {
     friendRank: Node | null = null;
     @property(Node) closeBtn: Node;
     @property(Node) successMask: Node;
+    @property(Node) nextLevelMask: Node;
     
     _level = 1;
     _basePosArr: Vec3[];
@@ -37,9 +38,7 @@ export class game extends Component {
                 this.successMask.active = true;
             }
             else {
-                this.storageScore();
-                this._level++;
-                this.reset();
+                this.nextLevelMask.active = true;
             }
         }
         this.stepLabel.string = `已用步数:${this._steps}`;
@@ -174,6 +173,14 @@ export class game extends Component {
                 console.log(res);
             },
         });
+    }
+
+    // next level
+    nextLevelClick () {
+        this.storageScore();
+        this._level++;
+        this.reset();
+        this.nextLevelMask.active = false;
     }
 }
 
