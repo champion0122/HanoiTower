@@ -35,6 +35,7 @@ export class game extends Component {
     update(deltaTime: number) {
         if(this._blockSortedArr[2].length === this._level + 2) {
             if(this._level === 4){
+                this.storageScore();
                 this.successMask.active = true;
             }
             else {
@@ -153,6 +154,8 @@ export class game extends Component {
 
     // wx 存储
     storageScore(){
+        const that = this;
+        const key = `wxScore-${this._level}`;
         window["wx"].setUserCloudStorage({
             KVDataList: [
                 {
@@ -163,15 +166,38 @@ export class game extends Component {
                         updateTime: Date.now(),
                     }),
                 },
-            ],
-            success: (res) => {
-                console.log('success');
-                console.log(res);
+            ]
+        });
+        window["wx"].getUserInfo({
+            openIdList: ['selfOpenId'],
+            success(res) {
+                const myself = res.data[0];
+                console.log('myself',myself);
+                // window["wx"].getFriendCloudStorage({
+                //     keyList: [key],
+                //     success(result) {
+                //         console.log('result',result)
+                //         if(result.data.length !== 0){
+                //             const myPreData = result.data.find((user) => user.openid === myself.openid).KVDataList[0];
+                //             // KVDataList为空，直接走存储流程
+                //             if(!myPreData){
+                //                 wxSetCloudStorage();
+                //             }
+                //             const {steps} = JSON.parse(myPreData.value);
+                //             if(steps <= that._steps){
+                //                 // 存储新数据
+                //                 wxSetCloudStorage();
+                //             }
+                //         } else {
+                //             // 没有好友数据
+                //             wxSetCloudStorage();
+                //         }
+                //     }
+                // });
             },
-            fail: (res) => {
-                console.log('fail');
-                console.log(res);
-            },
+            fail(err) {
+                console.log('fail',JSON.stringify(err));
+            }
         });
     }
 
