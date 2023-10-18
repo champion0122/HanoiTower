@@ -43,7 +43,7 @@ export class block extends Component {
         const formerSize = this.node.getComponent(UITransform).contentSize;
         this.node.getComponent(UITransform).setContentSize({
            ...formerSize,
-           width: formerSize.width * (blockIndex + 1) * 2 / 3 
+           width: formerSize.width * (blockIndex + 1) * 2 / 4 
         });
     }
 

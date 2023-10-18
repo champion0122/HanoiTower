@@ -1,5 +1,6 @@
-import { _decorator, Component, director, instantiate, Label, Node, Prefab, Size, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, director, Event, instantiate, Label, Layout, Node, Prefab, Size, UITransform, Vec3 } from 'cc';
 import { block } from './block';
+import { levelBtn } from './levelBtn';
 const { ccclass, property } = _decorator;
 
 @ccclass('game')
@@ -7,13 +8,14 @@ export class game extends Component {
     @property(Node) baseLayerNode: Node;
     @property(Node) blockLayerNode: Node;
     @property(Prefab) block: Prefab;
+    @property(Prefab) levelBtn: Prefab;
     @property(Label) stepLabel: Label;    
     @property(Label) levelLabel: Label;    
-    @property(Node)
-    friendRank: Node | null = null;
+    @property(Node) friendRank: Node | null = null;
     @property(Node) closeBtn: Node;
     @property(Node) successMask: Node;
     @property(Node) nextLevelMask: Node;
+    @property(Node) chooseLevelLayerNode: Node;
     
     _level = 1;
     _basePosArr: Vec3[];
@@ -58,7 +60,6 @@ export class game extends Component {
         })
         this._baseSize = baseArr[0].getComponent(UITransform).contentSize;
         this._lowestBaseY =  0 - this._baseSize.y / 2;
-        console.log(this._lowestBaseY);
         
         for (let i = 0; i < blockNum; i++) {
             const blockNode = instantiate(this.block);
@@ -109,7 +110,7 @@ export class game extends Component {
                 }
             });
         })
-        console.log(this._blockSortedArr)
+        // console.log(this._blockSortedArr)
     }
   
 
@@ -149,7 +150,8 @@ export class game extends Component {
     setCurLevel(){
         this.levelLabel.string = `当前关卡:${this._level}`;
         // 发消息给子域
-        window["wx"].postMessage({ command: "setCurLevel", level: this._level });
+        if(window["wx"])
+            window["wx"].postMessage({ command: "setCurLevel", level: this._level });
     }
 
     // wx 存储
@@ -168,37 +170,37 @@ export class game extends Component {
                 },
             ]
         });
-        window["wx"].getUserInfo({
-            openIdList: ['selfOpenId'],
-            success(res) {
-                const myself = res.data[0];
-                console.log('myself',myself);
-                // window["wx"].getFriendCloudStorage({
-                //     keyList: [key],
-                //     success(result) {
-                //         console.log('result',result)
-                //         if(result.data.length !== 0){
-                //             const myPreData = result.data.find((user) => user.openid === myself.openid).KVDataList[0];
-                //             // KVDataList为空，直接走存储流程
-                //             if(!myPreData){
-                //                 wxSetCloudStorage();
-                //             }
-                //             const {steps} = JSON.parse(myPreData.value);
-                //             if(steps <= that._steps){
-                //                 // 存储新数据
-                //                 wxSetCloudStorage();
-                //             }
-                //         } else {
-                //             // 没有好友数据
-                //             wxSetCloudStorage();
-                //         }
-                //     }
-                // });
-            },
-            fail(err) {
-                console.log('fail',JSON.stringify(err));
-            }
-        });
+        // window["wx"].getUserInfo({
+        //     openIdList: ['selfOpenId'],
+        //     success(res) {
+        //         const myself = res.data[0];
+        //         console.log('myself',myself);
+        //         // window["wx"].getFriendCloudStorage({
+        //         //     keyList: [key],
+        //         //     success(result) {
+        //         //         console.log('result',result)
+        //         //         if(result.data.length !== 0){
+        //         //             const myPreData = result.data.find((user) => user.openid === myself.openid).KVDataList[0];
+        //         //             // KVDataList为空，直接走存储流程
+        //         //             if(!myPreData){
+        //         //                 wxSetCloudStorage();
+        //         //             }
+        //         //             const {steps} = JSON.parse(myPreData.value);
+        //         //             if(steps <= that._steps){
+        //         //                 // 存储新数据
+        //         //                 wxSetCloudStorage();
+        //         //             }
+        //         //         } else {
+        //         //             // 没有好友数据
+        //         //             wxSetCloudStorage();
+        //         //         }
+        //         //     }
+        //         // });
+        //     },
+        //     fail(err) {
+        //         console.log('fail',JSON.stringify(err));
+        //     }
+        // });
     }
 
     // next level
@@ -207,6 +209,23 @@ export class game extends Component {
         this._level++;
         this.reset();
         this.nextLevelMask.active = false;
+    }
+
+    // choose level btn
+    clickChooseBtn() {
+        this.chooseLevelLayerNode.active = true;
+        for(let i = 1; i <= 4; i++){
+            const levelBtnNode = instantiate(this.levelBtn);
+            levelBtnNode.getComponent(levelBtn).init(i);
+            this.chooseLevelLayerNode.getChildByName('btnContainer').addChild(levelBtnNode);
+        }
+    }
+
+    closeChooseBtn(){
+        this.chooseLevelLayerNode.active = false;
+        this.scheduleOnce(() => {
+            this.chooseLevelLayerNode.getChildByName('btnContainer').destroyAllChildren();
+        })
     }
 }
 
